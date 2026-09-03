@@ -1,0 +1,38 @@
+services:
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: productmanagement-sqlserver
+
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "YourStrong@Password123"
+
+    ports:
+      - "1433:1433"
+
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+
+
+  api:
+    build:
+      context: .
+      dockerfile: src/ProductManagement.API/Dockerfile
+
+    container_name: productmanagement-api
+
+    depends_on:
+      - sqlserver
+
+    ports:
+      - "8080:8080"
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=ProductManagementDb;User Id=sa;Password=YourStrong@Password123;TrustServerCertificate=True;"
+
+
+volumes:
+  sqlserver_data:
